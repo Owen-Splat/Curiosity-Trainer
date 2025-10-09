@@ -1,0 +1,29 @@
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  build:
+    if: github.event.pull_request.merged
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - run: echo "Preparing '${{ github.event.ref }}' for release"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip' # caching pip dependencies
+      # Force upgrading pip (Might be removed at some point)
+      - run: pip install --upgrade pip
+      - run: pip install -r requirements.txt
+      - run: mkdir build
+      - run: python -m PyInstaller --log-level=WARN trainer.spec
+      - run: python build.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Curiosity Trainer-0.1.0-${{ matrix.os }}
+          path: dist/release_archive_0.1.0
