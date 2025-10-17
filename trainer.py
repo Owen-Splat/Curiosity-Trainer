@@ -4,7 +4,7 @@ from PySide6.QtCore import QTimer
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 import main_window as window
-import sys, os
+import sys, os, qdarktheme
 
 # allow keyboard interrupts
 def interruptHandler(sig, frame):
@@ -36,8 +36,9 @@ if sys.platform == "darwin": # mac
     build_icon = "icon.icns"
 
 app = QApplication([])
-app.setStyle("cleanlooks")
+app.setStyle("fusion")
 app.setWindowIcon(QIcon(os.path.join(ROOT_PATH, "assets", build_icon)))
+app.setStyleSheet(qdarktheme.load_stylesheet("dark"))
 
 m = window.MainWindow()
 
