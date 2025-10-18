@@ -41,6 +41,7 @@ app.setWindowIcon(QIcon(os.path.join(ROOT_PATH, "assets", build_icon)))
 app.setStyleSheet(qdarktheme.load_stylesheet("dark"))
 
 m = window.MainWindow()
+m.installEventFilter(app)
 
 # for keyboard interrupts
 timer = QTimer()

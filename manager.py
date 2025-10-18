@@ -5,7 +5,8 @@ from mem_edit import Process
 class CuriosityManager:
     BASE_ADDRESS = 0x00000000
     LIFE_PTR = (0x080A8F50, (0x30, 0xB0, 0x70, 0x830, 0x48, 0x0, 0x44))
-    POS_PTR = (0x080868A0, (0x30, 0x190, 0x10, 0x218, 0x430, 0xB0, 0x204))
+    POS_PTR = (0x080868A0, (0x30, 0x190, 0x10, 0x218, 0x430, 0xB0, 0x204)) # TODO: THIS POINTER IS NOT FULLY STATIC
+    POS_SCALE = 50
 
 
     def __init__(self) -> None:
@@ -37,16 +38,22 @@ class CuriosityManager:
         return offset
 
 
-    def readPosition(self) -> list:
+    def readPosition(self) -> tuple:
         addr = self.getPTRAddr(self.POS_PTR)
-        z = self.game.read_memory(addr, ctypes.c_float()) * 100
-        y = self.game.read_memory(addr - 8, ctypes.c_float()) * 100
-        x = self.game.read_memory(addr - 16, ctypes.c_float()) * 100
-        return [x.value, y.value, z.value]
+        z = self.game.read_memory(addr, ctypes.c_float())
+        y = self.game.read_memory(addr - 8, ctypes.c_float())
+        x = self.game.read_memory(addr - 16, ctypes.c_float())
+        return (x.value * self.POS_SCALE, y.value * self.POS_SCALE, z.value * self.POS_SCALE)
 
 
-    def writePosition(self, pos: list) -> None:
+    def writePosition(self, pos: tuple) -> None:
         addr = self.getPTRAddr(self.POS_PTR)
-        self.game.write_memory(addr, ctypes.c_float(pos[2] / 100))
-        self.game.write_memory(addr - 8, ctypes.c_float(pos[1] / 100))
-        self.game.write_memory(addr - 16, ctypes.c_float(pos[0] / 100))
+        self.game.write_memory(addr, ctypes.c_float(pos[2] / self.POS_SCALE))
+        self.game.write_memory(addr - 8, ctypes.c_float(pos[1] / self.POS_SCALE))
+        self.game.write_memory(addr - 16, ctypes.c_float(pos[0] / self.POS_SCALE))
+
+
+    def refillBedsLives(self) -> None:
+        addr = self.getPTRAddr(self.LIFE_PTR)
+        self.game.write_memory(addr, ctypes.c_int(999))
+        self.game.write_memory(addr + 8, ctypes.c_int(999))
