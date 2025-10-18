@@ -93,7 +93,6 @@ class MainWindow(QMainWindow):
         self.updatePos()
         self.ui.findWidget("NameField", QLineEdit).setText("Hotkey")
         self.savePos()
-        self.loadPos()
 
 
     def loadPos(self) -> None:
