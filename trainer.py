@@ -3,8 +3,9 @@
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
+from data import *
 import main_window as window
-import sys, os, qdarktheme
+import qdarktheme
 
 # allow keyboard interrupts
 def interruptHandler(sig, frame):
@@ -12,14 +13,6 @@ def interruptHandler(sig, frame):
 import signal
 signal.signal(signal.SIGINT, interruptHandler)
 
-# check if running from source
-if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-    from sys import _MEIPASS
-    IS_RUNNING_FROM_SOURCE = False
-    ROOT_PATH = _MEIPASS
-else:
-    IS_RUNNING_FROM_SOURCE = True
-    ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # set app id so the custom taskbar icon will show while running from source
 if IS_RUNNING_FROM_SOURCE:
@@ -41,7 +34,6 @@ app.setWindowIcon(QIcon(os.path.join(ROOT_PATH, "assets", build_icon)))
 app.setStyleSheet(qdarktheme.load_stylesheet("dark"))
 
 m = window.MainWindow()
-m.installEventFilter(app)
 
 # for keyboard interrupts
 timer = QTimer()

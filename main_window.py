@@ -1,10 +1,11 @@
-from PySide6.QtCore import Qt, QRegularExpression, QEvent
-from PySide6.QtGui import QRegularExpressionValidator, QKeyEvent
+from PySide6.QtCore import Qt, QEvent
+from PySide6.QtGui import QDoubleValidator, QKeyEvent
 from PySide6.QtWidgets import (QMainWindow, QWidget, QLabel, QLineEdit, QListWidget, QPushButton,
                                QHBoxLayout, QVBoxLayout, QSizePolicy, QSpacerItem, QMessageBox)
+from data import DEFAULT_POSITIONS, POSITION_FILE_PATH, SAVED_POSITIONS
 from manager import CuriosityManager
-from pathlib import Path
 from global_hotkeys import register_hotkey, start_checking_hotkeys, stop_checking_hotkeys
+import json, os
 
 
 class MainWindow(QMainWindow):
@@ -14,23 +15,24 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.show()
         self.setMinimumSize(500, 250)
+
         self.manager = None
-        self.positions = {
-            'Ascent': (-260.872, 228.578, 299.838),
-            'Aquarium': (275.933, 278.339, 327.438),
-            'Trip': (277.042, -289.551, 360.177),
-            'Hands': (295.013, -265.721, 380.029),
-            'Coffin Skip': (235.135, -317.513, 388.809),
-            'Amphitheater': (314.005, 336.79, 396.428),
-            'Lasers': (-277.931, -255.663, 422.543),
-        }
+
+        self.positions = self.getPositions()
         pos_list: QListWidget = self.ui.findWidget("PositionList", QListWidget)
         pos_list.addItems(list(self.positions.keys()))
         pos_list.setCurrentRow(0)
 
         register_hotkey("p", None, self.savePosHotkey, False)
-        register_hotkey("t", None, self.loadPos, False)
+        register_hotkey("t", None, self.loadPosHotkey, False)
         start_checking_hotkeys()
+
+
+    def getPositions(self) -> dict:
+        if SAVED_POSITIONS:
+            return SAVED_POSITIONS
+        else:
+            return DEFAULT_POSITIONS
 
 
     def connect(self) -> bool:
@@ -90,6 +92,11 @@ class MainWindow(QMainWindow):
     def savePosHotkey(self) -> None:
         """Updates the current position then saves it when the hotkey is released"""
 
+        if not self.connect():
+            return
+        if not self.manager.isFocused():
+            return
+
         self.updatePos()
         self.ui.findWidget("NameField", QLineEdit).setText("Hotkey")
         self.savePos()
@@ -108,26 +115,40 @@ class MainWindow(QMainWindow):
         self.manager.writePosition(self.positions[pos_list.item(pos_list.currentRow()).text()])
 
 
+    def loadPosHotkey(self) -> None:
+        """Teleports to the selected position when the hotkey is pressed with the game focused"""
+
+        if not self.connect():
+            return
+        if not self.manager.isFocused():
+            return
+
+        self.loadPos()
+
+
+    def deletePos(self) -> None:
+        """Deletes a position from the list"""
+
+        pos_list: QListWidget = self.ui.findWidget("PositionList", QListWidget)
+        current_item = pos_list.currentItem()
+        if current_item == None:
+            return
+
+        pos_list.removeItemWidget(current_item)
+        del self.positions[current_item.text()]
+
+
     def closeEvent(self, event):
-        print(self.positions)
+        """Save the position list before closing"""
+
         stop_checking_hotkeys()
+        with open(POSITION_FILE_PATH, 'w') as f:
+            f.write(json.dumps(self.positions, indent=4))
         return super().closeEvent(event)
 
 
-    def eventFilter(self, watched, event):
-        if event.type() == QEvent.Type.KeyPress:
-            key_event = QKeyEvent(event)
-            match key_event.key:
-                case Qt.Key.Key_F:
-                    self.updatePos()
-                    self.ui.findWidget("NameField", QLineEdit).setText("Hotkey")
-                    self.savePos()
-                case Qt.Key.Key_T:
-                    self.loadPos()
 
-        return super().eventFilter(watched, event)
-
-
+### UI CODE <-------------------------------------------------------------------------------------
 class Ui_MainWindow(object):
     def setupUi(self, window: QMainWindow) -> None:
         self.window = window
@@ -141,16 +162,25 @@ class Ui_MainWindow(object):
         pos_list = QListWidget(central_widget)
         pos_list.setObjectName("PositionList")
         left_layout.addWidget(pos_list)
+
+        left_hl_layout = QHBoxLayout()
+        del_button = QPushButton("Delete Position", central_widget)
+        del_button.clicked.connect(window.deletePos)
+        left_hl_layout.addWidget(del_button)
+        left_hl_layout.addSpacerItem(self.createHorizontalSpacer())
         tel_button = QPushButton("Teleport To Position", central_widget)
         tel_button.clicked.connect(window.loadPos)
         tel_button.setShortcut("T")
-        left_layout.addWidget(tel_button)
+        tel_button.setMinimumWidth(75)
+        left_hl_layout.addWidget(tel_button)
+
+        left_layout.addLayout(left_hl_layout)
         main_layout.addLayout(left_layout)
 
         # right side
         right_layout = QVBoxLayout()
-        numbers = QRegularExpression(r"^[0-9]{1,3}(?:\.[0-9]{1,3})?$")
-        validator = QRegularExpressionValidator(numbers)
+        validator = QDoubleValidator(-9999.999, 9999.999, 3, central_widget)
+        validator.setNotation(QDoubleValidator.Notation.StandardNotation)
 
         x_layout = QHBoxLayout()
         x_text = QLabel("X", central_widget)
