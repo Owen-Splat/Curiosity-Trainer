@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QLabel, QLineEdit, QListWid
 from data import DEFAULT_POSITIONS, POSITION_FILE_PATH, SAVED_POSITIONS
 from manager import CuriosityManager
 from global_hotkeys import register_hotkey, start_checking_hotkeys, stop_checking_hotkeys
-import json, os
+import json, time
 
 
 class MainWindow(QMainWindow):
@@ -134,7 +134,7 @@ class MainWindow(QMainWindow):
         if current_item == None:
             return
 
-        pos_list.removeItemWidget(current_item)
+        pos_list.takeItem(pos_list.currentRow())
         del self.positions[current_item.text()]
 
 
@@ -166,13 +166,11 @@ class Ui_MainWindow(object):
         left_hl_layout = QHBoxLayout()
         del_button = QPushButton("Delete Position", central_widget)
         del_button.clicked.connect(window.deletePos)
-        left_hl_layout.addWidget(del_button)
-        left_hl_layout.addSpacerItem(self.createHorizontalSpacer())
+        left_hl_layout.addWidget(del_button, 1)
         tel_button = QPushButton("Teleport To Position", central_widget)
         tel_button.clicked.connect(window.loadPos)
         tel_button.setShortcut("T")
-        tel_button.setMinimumWidth(75)
-        left_hl_layout.addWidget(tel_button)
+        left_hl_layout.addWidget(tel_button, 2)
 
         left_layout.addLayout(left_hl_layout)
         main_layout.addLayout(left_layout)
@@ -226,10 +224,6 @@ class Ui_MainWindow(object):
 
         central_widget.setLayout(main_layout)
         window.setCentralWidget(central_widget)
-
-
-    def createHorizontalSpacer(self) -> QSpacerItem:
-        return QSpacerItem(1, 30, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
 
     def findWidget(self, widget_name: str, widget_type) -> QWidget:
