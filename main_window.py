@@ -225,7 +225,7 @@ class MainWindow(QMainWindow):
 class Ui_MainWindow(object):
     def setupUi(self, window: QMainWindow) -> None:
         self.window = window
-        window.setWindowTitle("Curiosity Trainer")
+        window.setWindowTitle("Curiosity Trainer v0.2.0")
 
         central_widget = QWidget(window)
         main_layout = QVBoxLayout(central_widget)
