@@ -1,43 +1,53 @@
+from PySide6.QtCore import QThread, Signal, QObject
 import ctypes, math, win32ui, win32process, win32api
 from mem_edit import Process
 import time
 
 
-class CuriosityManager:
-    PID = 0
-    BASE_ADDRESS = 0x00000000
-    LIFE_PTR = (0x080A8F50, (0x30, 0xB0, 0x70, 0x830, 0x48, 0x0, 0x44)) # might also not be static, I had gotten it down to 12 pointers and chosen the first one
+class CuriosityManager(QObject):
     POS_PTR = (0x07F28FF0, (0xD30, 0x0, 0xBC0, 0x310, 0x198, 0xB0, 0x200))
-    # POS_PTR = (0x080868A0, (0x30, 0x190, 0x10, 0x218, 0x430, 0xB0, 0x204)) # TODO: THIS POINTER IS NOT FULLY STATIC
     POS_SCALE = 100
+    MAX_JUMPS_PTR = (0x080A8F50, (0x58, 0x688, 0x470))
+    JUMP_EFFECT_PTR = (0x0817CA58, (0xF0, 0x1F0, 0x0, 0x50))
+    VELOCITY_PTR = (0x08095878, (0x0, 0x90, 0x50, 0x188, 0x218, 0x10, 0xC8))
 
 
-    def __init__(self) -> None:
-        process_all_access = 0x1F0FFF
+    def __init__(self, parent=None) -> None:
+        QObject.__init__(self, parent)
         hwnd = win32ui.FindWindow("UnrealWindow", "Curiosity  ").GetSafeHwnd()
         self.PID = win32process.GetWindowThreadProcessId(hwnd)[1]
-        process = win32api.OpenProcess(process_all_access, True, self.PID)
+        process = win32api.OpenProcess(0x1F0FFF, True, self.PID)
         modules = win32process.EnumProcessModules(process)
-        self.BASE_ADDRESS = modules[0]
         process.close()
+        self.BASE_ADDRESS = modules[0]
         self.game = Process(self.PID)
+        self.flyhack_thread = None
+        self.speedwatch_thread = None
+
+
+    def kill(self) -> None:
+        """Kills any currently running threads so that the window can close without issue"""
+        if self.flyhack_thread != None:
+            self.flyhack_thread.on = False
+        if self.speedwatch_thread != None:
+            self.speedwatch_thread.on = False
+        time.sleep(0.1)
+        self.game.close()
 
 
     def isFocused(self) -> bool:
+        """Checks if the game has focus. This is so that the hotkeys only trigger during gameplay"""
         hwnd = win32ui.GetForegroundWindow().GetSafeHwnd()
         return self.PID == win32process.GetWindowThreadProcessId(hwnd)[1]
 
 
     def isStillConnected(self) -> bool:
-        try:
-            self.game.read_memory(0x0, ctypes.c_byte())
-        except:
-            return False
-        else:
-            return True
+        """Checks if the game is still running by attempting to read data"""
+        return self.PID in self.game.list_available_pids()
 
 
     def getPTRAddr(self, pointer: tuple) -> int:
+        """Gets the final address of a pointer"""
         addr, offsets = pointer
         offset = self.BASE_ADDRESS + addr
         for i in range(len(offsets)):
@@ -47,12 +57,14 @@ class CuriosityManager:
 
 
     def readPosition(self) -> tuple:
+        """Returns a tuple of the current player position"""
         addr = self.getPTRAddr(self.POS_PTR)
         pos = self.game.read_memory(addr - 0x10, Vector3())
         return (pos.X / self.POS_SCALE, pos.Y / self.POS_SCALE, pos.Z / self.POS_SCALE)
 
 
     def writePosition(self, _pos: tuple) -> None:
+        """Writes the position to memory to teleport the player"""
         addr = self.getPTRAddr(self.POS_PTR)
 
         # set position
@@ -62,33 +74,74 @@ class CuriosityManager:
             _pos[2] * self.POS_SCALE
         )
         self.game.write_memory(addr - 0x10, pos)
+        self.game.write_memory(addr - 0xD8, pos)
 
-        # # reset angle - NOT WORKING
-        # self.game.write_memory(addr - 0x30, Vector3(0, 0, 0))
-
-        # # reset velocity - NOT WORKING
-        # self.game.write_memory(addr - 0x90, Vector3(0, 0, 0))
+        # reset velocity
+        addr = self.getPTRAddr(self.VELOCITY_PTR)
+        self.game.write_memory(addr - 0x10, Vector3(0, 0, 0))
 
 
-class SaveData(ctypes.Structure):
-    _fields_ = [
-        ("TimesSlept", ctypes.c_int32),
-        ("SleepsRemaining", ctypes.c_int32), # LIFE_PTR result
-        ("TimesMadeBed", ctypes.c_int32),
-        ("BedsRemaining", ctypes.c_int32),
-        ("PlayedIntro", ctypes.c_bool),
-        ("UnlockedSleeping", ctypes.c_bool),
-        ("ZonesEntered", ctypes.c_int32),
-        ("ZonesFellFrom", ctypes.c_int32),
-        ("NonCafeZonesEntered", ctypes.c_int32),
-        ("WakeUpId", ctypes.c_int32)
-    ]
-    # BED_OBJECT_PATH = ""
-    # BED_OBJECT_OFFSET = None # Vector
-    # BED_OBJECT_ROTATION = 0.0 # Double
-    # BED_ZONE_INDEX = 0
-    # TRIGGERED_DIALOGUE_AUDIO_TRIGGERS = None # set property, int, maybe a bitmask?
-    # TIMES_SPAWNED = 0
+    def toggleDoubleJump(self, on: bool) -> None:
+        jump_addr = self.getPTRAddr(self.MAX_JUMPS_PTR)
+        jump_num = 2 if on else 1
+        effect_addr = self.getPTRAddr(self.JUMP_EFFECT_PTR)
+
+        self.game.write_memory(jump_addr, ctypes.c_int32(jump_num))
+        self.game.write_memory(effect_addr + 0x2, ctypes.c_bool(on))
+
+
+    def toggleFlyHack(self, on: bool) -> None:
+        if not on:
+            if self.flyhack_thread != None:
+                self.flyhack_thread.on = False
+                addr = self.getPTRAddr(self.VELOCITY_PTR)
+                self.game.write_memory(addr, ctypes.c_double(0.0)) # only reset z velocity when exiting flyhack
+            return
+        else:
+            self.flyhack_thread = FlyHack(self.game, self.getPTRAddr(self.VELOCITY_PTR))
+            self.flyhack_thread.start()
+            return
+
+
+    def toggleSpeedMonitor(self, on: bool) -> None:
+        if not on:
+            if self.speedwatch_thread != None:
+                self.speedwatch_thread.on = False
+            return
+        else:
+            self.speedwatch_thread = SpeedWatch(self.game, self.getPTRAddr(self.VELOCITY_PTR))
+            self.speedwatch_thread.speed_emitter.connect(self.parent().getSpeed)
+            self.speedwatch_thread.start()
+
+
+class FlyHack(QThread):
+    def __init__(self, _game: Process, _addr: int) -> None:
+        QThread.__init__(self, None)
+        self.game = _game
+        self.addr = _addr
+        self.on = True
+
+    def run(self) -> None:
+        while self.on:
+            self.game.write_memory(self.addr, ctypes.c_double(325*10)) # high jump velocity x20
+            time.sleep(1/60)
+
+
+class SpeedWatch(QThread):
+    speed_emitter = Signal(float)
+
+    def __init__(self, _game: Process, _addr: int) -> None:
+        QThread.__init__(self, None)
+        self.game = _game
+        self.addr = _addr
+        self.on = True
+
+    def run(self) -> None:
+        while self.on:
+            vel = self.game.read_memory(self.addr - 0x10, Vector3())
+            speed = math.sqrt(pow(vel.X, 2) + pow(vel.Y, 2)) # we do not care about speed along the Z axis
+            self.speed_emitter.emit(speed)
+            time.sleep(1/60)
 
 
 class Vector3(ctypes.Structure):
