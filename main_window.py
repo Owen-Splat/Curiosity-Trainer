@@ -1,8 +1,8 @@
-from PySide6.QtCore import Qt, QEvent
-from PySide6.QtGui import QDoubleValidator, QKeyEvent
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QDoubleValidator
 from PySide6.QtWidgets import (QMainWindow, QWidget, QLabel, QLineEdit, QListWidget, QPushButton, QGroupBox,
-                               QHBoxLayout, QVBoxLayout, QSizePolicy, QSpacerItem, QMessageBox)
-from data import DEFAULT_POSITIONS, POSITION_FILE_PATH, SAVED_POSITIONS
+                               QHBoxLayout, QVBoxLayout, QMessageBox)
+from data import DEFAULT_POSITIONS, POSITION_FILE_PATH, SAVED_POSITIONS, VERSION
 from manager import CuriosityManager
 from global_hotkeys import register_hotkey, start_checking_hotkeys, stop_checking_hotkeys
 import json
@@ -225,7 +225,7 @@ class MainWindow(QMainWindow):
 class Ui_MainWindow(object):
     def setupUi(self, window: QMainWindow) -> None:
         self.window = window
-        window.setWindowTitle("Curiosity Trainer v0.2.0")
+        window.setWindowTitle(f"Curiosity Trainer v{VERSION}")
 
         central_widget = QWidget(window)
         main_layout = QVBoxLayout(central_widget)

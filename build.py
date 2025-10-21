@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from data import VERSION
 import platform, shutil, sys
 
 base_name = 'Curiosity Trainer'
-version = '0.1.0'
 
 exe_ext = ""
 if platform.system() == "Windows":
@@ -20,7 +20,7 @@ exe_path = Path(sys.argv[0]).parent.absolute() / 'dist' / str(base_name + exe_ex
 if not (exe_path.is_file() or exe_path.is_dir()):
     raise Exception("Executable not found: %s" % exe_path)
 
-release_path = Path(".") / "dist" / str("release_archive_" + version)
+release_path = Path(".") / "dist" / str("release_archive_" + VERSION)
 print("Writing build to path: %s" % (release_path))
 
 if release_path.exists() and release_path.is_dir():
