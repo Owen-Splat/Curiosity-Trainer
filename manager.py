@@ -140,7 +140,7 @@ class SpeedWatch(QThread):
         while self.on:
             vel = self.game.read_memory(self.addr - 0x10, Vector3())
             speed = math.sqrt(pow(vel.X, 2) + pow(vel.Y, 2)) # we do not care about speed along the Z axis
-            self.speed_emitter.emit(speed)
+            self.speed_emitter.emit(speed / 10)
             time.sleep(1/60)
 
 
