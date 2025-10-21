@@ -1,9 +1,9 @@
 # Curiosity Trainer
-A save editor for Curiosity, designed with speedrun practice in mind
+A speedrun trainer for Curiosity. THIS CAN CAUSE YOU TO EARN ACHIEVEMENTS ILLEGITIMATELY. DO NOT USE IF YOU CARE ABOUT THAT
 
-## Information
-This does not currently create save data for you. Before using this editor, you must play up to the save checkpoint in the first cafe
-
-You can set your bed and life counts up to 999. You can also set your save respawn point to any cafe. Editing bed position is not currently supported
-
-THIS CAN AND WILL CAUSE YOU TO EARN ACHIEVEMENTS. DO NOT USE IF YOU CARE ABOUT THAT
+## Features
+- Save and load positions
+- Monitor player speed
+- Enable Double Jump
+- Enable Flyhack
+- Hotkeys for actions only when focused on the game (b->save, t->load, h->flyhack)
