@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from data import VERSION
 
 a = Analysis(
     ['trainer.py'],
@@ -42,5 +43,5 @@ app = BUNDLE(exe,
         "LSBackgroundOnly": False,
         "CFBundleDisplayName": "Curiosity Trainer",
         "CFBundleName": "Curiosity Trainer",
-        "CFBundleShortVersionString": "0.1.0"
+        "CFBundleShortVersionString": VERSION
     })
