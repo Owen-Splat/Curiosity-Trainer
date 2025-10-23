@@ -31,3 +31,6 @@ if os.path.exists(POSITION_FILE_PATH):
             SAVED_POSITIONS = {}
 else:
     SAVED_POSITIONS = {}
+
+with open(os.path.join(ROOT_PATH, "assets", "theme.txt"), 'r') as f:
+    THEME = f.read()
