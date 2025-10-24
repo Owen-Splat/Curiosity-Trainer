@@ -14,7 +14,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.show()
-        self.setMinimumSize(613, 402)
+        self.setMinimumSize(686, 402)
 
         self.manager = None
 
@@ -144,32 +144,32 @@ class MainWindow(QMainWindow):
         del self.positions[current_item.text()]
 
 
-    def toggleDoubleJump(self) -> None:
-        """Toggles the double jump ability"""
+    # def toggleDoubleJump(self) -> None:
+    #     """Toggles the double jump ability"""
 
-        if not self.connect():
-            return
+    #     if not self.connect():
+    #         return
 
-        jump_button: QPushButton = self.ui.findWidget("JumpButton", QPushButton)
-        state = jump_button.isChecked()
-        if state:
-            jump_button.setText("Disable Double Jump")
-        else:
-            jump_button.setText("Enable Double Jump")
-        self.manager.toggleDoubleJump(state)
+    #     jump_button: QPushButton = self.ui.findWidget("JumpButton", QPushButton)
+    #     state = jump_button.isChecked()
+    #     if state:
+    #         jump_button.setText("Disable Double Jump")
+    #     else:
+    #         jump_button.setText("Enable Double Jump")
+    #     self.manager.toggleDoubleJump(state)
 
 
-    def doubleJumpHotkey(self) -> None:
-        """Toggles the double jump ability when the hotkey is pressed"""
+    # def doubleJumpHotkey(self) -> None:
+    #     """Toggles the double jump ability when the hotkey is pressed"""
 
-        if not self.connect(show_error=False):
-            return
-        if not self.manager.isFocused():
-            return
+    #     if not self.connect(show_error=False):
+    #         return
+    #     if not self.manager.isFocused():
+    #         return
 
-        jump_button: QPushButton = self.ui.findWidget("JumpButton", QPushButton)
-        jump_button.setChecked(not jump_button.isChecked())
-        self.toggleDoubleJump()
+    #     jump_button: QPushButton = self.ui.findWidget("JumpButton", QPushButton)
+    #     jump_button.setChecked(not jump_button.isChecked())
+    #     self.toggleDoubleJump()
 
 
     def toggleFlyHack(self) -> None:
@@ -299,11 +299,11 @@ class Ui_MainWindow(object):
         group_layout = QVBoxLayout()
 
         buttons_layout = QHBoxLayout()
-        jump_button = QPushButton("Enable Double Jump", group)
-        jump_button.setObjectName("JumpButton")
-        jump_button.setCheckable(True)
-        jump_button.clicked.connect(self.window.toggleDoubleJump)
-        buttons_layout.addWidget(jump_button)
+        # jump_button = QPushButton("Enable Double Jump", group)
+        # jump_button.setObjectName("JumpButton")
+        # jump_button.setCheckable(True)
+        # jump_button.clicked.connect(self.window.toggleDoubleJump)
+        # buttons_layout.addWidget(jump_button)
         fly_button = QPushButton("Enable Fly Hack", group)
         fly_button.setObjectName("FlyButton")
         fly_button.setCheckable(True)

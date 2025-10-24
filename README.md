@@ -4,6 +4,5 @@ A speedrun trainer for Curiosity. THIS CAN CAUSE YOU TO EARN ACHIEVEMENTS ILLEGI
 ## Features
 - Save and load positions
 - Monitor player speed
-- Enable Double Jump
 - Enable Flyhack
 - Hotkeys for actions only when focused on the game (b->save, t->load, h->flyhack)

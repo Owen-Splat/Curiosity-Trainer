@@ -79,13 +79,13 @@ class CuriosityManager(QObject):
         self.game.write_memory(addr - 0x10, Vector3(0, 0, 0))
 
 
-    def toggleDoubleJump(self, on: bool) -> None:
-        jump_addr = self.getPTRAddr(self.MAX_JUMPS_PTR)
-        jump_num = 2 if on else 1
-        effect_addr = self.getPTRAddr(self.JUMP_EFFECT_PTR)
+    # def toggleDoubleJump(self, on: bool) -> None:
+    #     jump_addr = self.getPTRAddr(self.MAX_JUMPS_PTR)
+    #     jump_num = 2 if on else 1
+    #     effect_addr = self.getPTRAddr(self.JUMP_EFFECT_PTR)
 
-        self.game.write_memory(jump_addr, ctypes.c_int32(jump_num))
-        self.game.write_memory(effect_addr + 0x2, ctypes.c_bool(on))
+    #     self.game.write_memory(jump_addr, ctypes.c_int32(jump_num))
+    #     self.game.write_memory(effect_addr + 0x2, ctypes.c_bool(on))
 
 
     def toggleFlyHack(self, on: bool) -> None:
