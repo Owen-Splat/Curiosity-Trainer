@@ -48,6 +48,7 @@ class MainWindow(QMainWindow):
             if self.manager == None:
                 self.manager = CuriosityManager(self)
             if not self.manager.isStillConnected():
+                self.manager.kill()
                 self.manager = None
                 raise ConnectionError
         except:
@@ -204,6 +205,8 @@ class MainWindow(QMainWindow):
         """Outputs the current player speed"""
 
         if not self.connect():
+            speed_button.setText("Monitor Speed")
+            self.getSpeed(0.0)
             return
 
         speed_button: QPushButton = self.ui.findWidget("SpeedButton", QPushButton)
