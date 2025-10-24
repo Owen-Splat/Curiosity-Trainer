@@ -1,5 +1,5 @@
 # Curiosity Trainer
-A speedrun trainer for Curiosity. THIS CAN CAUSE YOU TO EARN ACHIEVEMENTS ILLEGITIMATELY. DO NOT USE IF YOU CARE ABOUT THAT
+A speedrun trainer for Curiosity v1.0.7. THIS CAN CAUSE YOU TO EARN ACHIEVEMENTS ILLEGITIMATELY. DO NOT USE IF YOU CARE ABOUT THAT
 
 ## Features
 - Save and load positions
