@@ -31,5 +31,5 @@ jobs:
       - run: python build.py
       - uses: actions/upload-artifact@v4
         with:
-          name: Curiosity Trainer-0.2.0-${{ matrix.os }}
-          path: dist/release_archive_0.2.0
+          name: Curiosity Trainer-0.3.0-${{ matrix.os }}
+          path: dist/release_archive_0.3.0

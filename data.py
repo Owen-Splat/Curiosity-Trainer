@@ -1,6 +1,6 @@
 import sys, os, json
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
 # check if running from source
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
