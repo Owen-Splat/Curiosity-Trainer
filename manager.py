@@ -40,7 +40,7 @@ class CuriosityManager(QObject):
 
 
     def isStillConnected(self) -> bool:
-        """Checks if the game is still running by attempting to read data"""
+        """Checks if the game is still running by checking if its PID is in the list of running process IDs"""
         return self.PID in self.game.list_available_pids()
 
 
@@ -121,7 +121,7 @@ class FlyHack(QThread):
 
     def run(self) -> None:
         while self.on:
-            self.game.write_memory(self.addr, ctypes.c_double(325*10)) # high jump velocity x20
+            self.game.write_memory(self.addr, ctypes.c_double(325*10)) # high jump velocity x10
             time.sleep(1/60)
 
 
