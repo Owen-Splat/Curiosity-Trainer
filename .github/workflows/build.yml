@@ -24,7 +24,7 @@ jobs:
           python-version: '3.12'
           cache: 'pip' # caching pip dependencies
       # Force upgrading pip (Might be removed at some point)
-      - run: pip install --upgrade pip
+      # - run: pip install --upgrade pip
       - run: pip install -r requirements.txt
       - run: mkdir build
       - run: python -m PyInstaller --log-level=WARN trainer.spec
