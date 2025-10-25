@@ -1,7 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-from data import VERSION
-
 a = Analysis(
     ['trainer.py'],
     pathex=[],
@@ -34,14 +32,3 @@ exe = EXE(
     console=False,
     icon="assets/icon.ico"
 )
-
-app = BUNDLE(exe,
-    name='Curiosity Trainer.app',
-    icon="assets/icon.icns",
-    bundle_identifier=None,
-    info_plist={
-        "LSBackgroundOnly": False,
-        "CFBundleDisplayName": "Curiosity Trainer",
-        "CFBundleName": "Curiosity Trainer",
-        "CFBundleShortVersionString": VERSION
-    })
